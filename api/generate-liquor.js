@@ -65,9 +65,9 @@ export default async function handler(req, res) {
     const {
       type,               // "liquor-glasses", "liquor-bottles", "custom"
       dimensions,
-      itemStyle,          // e.g. "Tumbler", "Highball", "Whiskey Bottle", "Round"
+      itemStyle,
       designDescription,
-      finish,             // clear, frosted, crystal, tinted, etc.
+      finish,
       engraving,
     } = req.body;
 
@@ -77,7 +77,6 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // For glasses and bottles, dimensions and style are required
     if (type !== 'custom') {
       if (!dimensions || !itemStyle) {
         return res.status(400).json({ error: "Dimensions and style are required for this product type" });
@@ -89,6 +88,8 @@ export default async function handler(req, res) {
     if (type === 'custom') {
       prompt = `
         Photorealistic image of a custom liquor-related product (glass, bottle, or bar accessory).
+        The item must be completely empty – no liquid, no ice, no drink inside.
+        No labels, no pre‑printed text or logos unless described below.
         Design description: ${designDescription}
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
         Show the item with the design clearly visible, premium lighting, high quality.
@@ -98,24 +99,29 @@ export default async function handler(req, res) {
     else if (type === 'liquor-glasses') {
       prompt = `
         Photorealistic image of a premium custom liquor glass.
+        The glass must be COMPLETELY EMPTY – no liquid, no ice, no drink, no condensation.
         Capacity / dimensions: ${dimensions}.
         Glass style: ${itemStyle}.
         Finish: ${finish || "crystal clear"}.
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
         Design: ${designDescription}.
-        Show the glass with the design clearly visible, natural lighting, high quality, elegant.
+        IMPORTANT: The glass has no pre‑existing labels, no brand names, no stickers. The only visible decoration is the design described above.
+        Show the empty glass with the design clearly visible, natural lighting, high quality, elegant.
         Background neutral, focus on the item.
       `;
     }
     else if (type === 'liquor-bottles') {
       prompt = `
         Photorealistic image of a custom liquor bottle.
+        The bottle must be COMPLETELY EMPTY – no liquid inside, no liquid visible, no condensation.
+        No labels, no stickers, no brand markings unless described below.
         Volume / dimensions: ${dimensions}.
         Bottle shape/style: ${itemStyle}.
         Finish/colour: ${finish || "clear glass"}.
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
         Design: ${designDescription}.
-        Show the bottle with the design clearly visible, natural lighting, high quality.
+        IMPORTANT: The bottle has no pre‑existing labels, no brand names, no stickers. The only visible decoration is the design described above.
+        Show the empty bottle with the design clearly visible, natural lighting, high quality.
         Background neutral, focus on the item.
       `;
     }
