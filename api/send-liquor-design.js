@@ -23,7 +23,7 @@ export default async function handler(req, res) {
       phone,
       productType,
       dimensions,
-      woodType,
+      itemStyle,
       designDescription,
       finish,
       engraving,
@@ -48,21 +48,13 @@ export default async function handler(req, res) {
 
     // Format display strings based on product type
     let dimensionsDisplay = dimensions;
-    let woodTypeDisplay = woodType;
-    let finishDisplay = finish || "natural";
+    let styleDisplay = itemStyle;
+    let finishDisplay = finish || "standard";
 
-    if (productType === 'custom-plaque') {
+    if (productType === 'custom') {
       dimensionsDisplay = "Custom (see description)";
-      woodTypeDisplay = "Custom (see description)";
+      styleDisplay = "Custom (see description)";
       finishDisplay = "Custom (see description)";
-    } else if (productType === 'squared-plaque') {
-      // For squared plaque, the "finish" field holds the actual type (e.g., High Gloss Mahogany)
-      // and woodType may be "custom" placeholder. Show finish as "Type".
-      woodTypeDisplay = finishDisplay; // Type
-      finishDisplay = "N/A (see Type)";
-    } else if (productType === 'shadowbox') {
-      // Shadow box: woodType is the stain, finish is not used
-      finishDisplay = "Not applicable for shadow box";
     }
 
     const html = `
@@ -72,10 +64,10 @@ export default async function handler(req, res) {
       <p><b>Phone:</b> ${phone}</p>
 
       <h2>Design Details</h2>
-      <p><b>Product Type:</b> ${productType}</p>
-      <p><b>Dimensions:</b> ${dimensionsDisplay}</p>
-      <p><b>${productType === 'squared-plaque' ? 'Type' : 'Wood Stain / Type'}:</b> ${woodTypeDisplay}</p>
-      <p><b>Finish:</b> ${finishDisplay}</p>
+      <p><b>Product Type:</b> ${productType === 'liquor-glasses' ? 'Liquor Glasses' : productType === 'liquor-bottles' ? 'Liquor Bottles' : 'Custom'}</p>
+      <p><b>Dimensions / Capacity:</b> ${dimensionsDisplay}</p>
+      <p><b>Style / Shape:</b> ${styleDisplay}</p>
+      <p><b>Finish / Colour:</b> ${finishDisplay}</p>
       <p><b>Engraving:</b> ${engraving === "yes" ? "Yes (laser engraved)" : "No (printed)"}</p>
       <p><b>Design Description:</b> ${designDescription}</p>
 
@@ -86,8 +78,8 @@ export default async function handler(req, res) {
     `;
 
     await resend.emails.send({
-      from: "Wooden Items Designer <onboarding@resend.dev>",
-      to: "lcww@integritybottles.com", // replace with your team email
+      from: "Liquor Designer <onboarding@resend.dev>",
+      to: "your-team@integritybottles.com", // CHANGE THIS to your actual email
       subject: `New ${productType} Design Request from ${name}`,
       html,
     });

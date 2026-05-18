@@ -63,75 +63,67 @@ export default async function handler(req, res) {
     await runMiddleware(req, res, multerMiddleware);
 
     const {
-      type,               // shadowbox / squared-plaque / custom-plaque
+      type,               // "liquor-glasses", "liquor-bottles", "custom"
       dimensions,
-      woodType,
+      itemStyle,          // e.g. "Tumbler", "Highball", "Whiskey Bottle", "Round"
       designDescription,
-      finish,
+      finish,             // clear, frosted, crystal, tinted, etc.
       engraving,
     } = req.body;
 
     const uploadedFiles = req.files || [];
 
-    // Basic validation
     if (!type || !designDescription) {
       return res.status(400).json({ error: "Missing required fields" });
     }
 
-    // For non-custom plaques, dimensions and woodType are required
-    if (type !== 'custom-plaque') {
-      if (!dimensions || !woodType) {
-        return res.status(400).json({ error: "Dimensions and wood type are required for this product type" });
+    // For glasses and bottles, dimensions and style are required
+    if (type !== 'custom') {
+      if (!dimensions || !itemStyle) {
+        return res.status(400).json({ error: "Dimensions and style are required for this product type" });
       }
     }
 
     let prompt = "";
 
-    if (type === 'custom-plaque') {
+    if (type === 'custom') {
       prompt = `
-        Photorealistic image of a custom wooden plaque.
+        Photorealistic image of a custom liquor-related product (glass, bottle, or bar accessory).
         Design description: ${designDescription}
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
-        Show the wooden item with the design clearly visible, natural lighting, high quality.
+        Show the item with the design clearly visible, premium lighting, high quality.
         Background neutral, focus on the item.
       `;
-    } 
-    else if (type === 'shadowbox') {
+    }
+    else if (type === 'liquor-glasses') {
       prompt = `
-        Photorealistic image of a custom wooden shadow box.
-        Dimensions: ${dimensions}.
-        Wood stain: ${woodType}.
+        Photorealistic image of a premium custom liquor glass.
+        Capacity / dimensions: ${dimensions}.
+        Glass style: ${itemStyle}.
+        Finish: ${finish || "crystal clear"}.
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
         Design: ${designDescription}.
-        Show the wooden item with the design clearly visible, natural lighting, high quality.
+        Show the glass with the design clearly visible, natural lighting, high quality, elegant.
         Background neutral, focus on the item.
       `;
-    } 
-    else if (type === 'squared-plaque') {
-      // For squared plaque, "finish" contains the selected type (e.g., High Gloss Mahogany)
+    }
+    else if (type === 'liquor-bottles') {
       prompt = `
-        Photorealistic image of a custom wooden squared plaque.
-        Dimensions: ${dimensions}.
-        Finish: ${finish || "natural"}.
+        Photorealistic image of a custom liquor bottle.
+        Volume / dimensions: ${dimensions}.
+        Bottle shape/style: ${itemStyle}.
+        Finish/colour: ${finish || "clear glass"}.
         Engraving: ${engraving === "yes" ? "yes, laser engraved" : "no, printed"}.
         Design: ${designDescription}.
-        Show the wooden item with the design clearly visible, natural lighting, high quality.
+        Show the bottle with the design clearly visible, natural lighting, high quality.
         Background neutral, focus on the item.
       `;
     }
 
     const imageUrl = await generateImage(prompt, uploadedFiles);
-
-    return res.status(200).json({
-      success: true,
-      type,
-      imageUrl,
-    });
+    return res.status(200).json({ success: true, type, imageUrl });
   } catch (error) {
     console.error("Handler error:", error);
-    return res.status(500).json({
-      success: false,
-      error: error.message || "Generation failed",
-    });
+    return res.status(500).json({ success: false, error: error.message || "Generation failed" });
   }
 }
