@@ -79,7 +79,7 @@ export default async function handler(req, res) {
 
     await resend.emails.send({
       from: "Liquor Designer <onboarding@resend.dev>",
-      to: "your-team@integritybottles.com", // CHANGE THIS to your actual email
+      to: "edwin@integritybottles.com", // CHANGE THIS to your actual email
       subject: `New ${productType} Design Request from ${name}`,
       html,
     });
